@@ -8,9 +8,7 @@
 import SwiftUI
 
 struct ContentView: View {
-    @State private var showingAlert = false
-    @State private var addressString = ""
-    @ObservedObject var locationManager = LocationManager.instance
+    @ObservedObject var locationManager = LocationManager()
     
     
     var body: some View {
@@ -18,42 +16,28 @@ struct ContentView: View {
             Form{
                 Section {
                     Text("Enter Address")
-                    TextField("", text: $addressString)
+                    TextField("", text: $locationManager.locationString)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                         .padding(.horizontal)
                 }
                 Button {
-                    getMap()
+                    locationManager.openMapWithAddress()
                     
                 } label: {
                     Text("Get Map")
                 }
-                .alert(isPresented: $showingAlert) {
+                .alert(isPresented: $locationManager.invalid) {
                     Alert(title: Text("Important message"), message: Text("Enter a valid address"), dismissButton: .default(Text("OK"), action:{
-                        getMap()
+                        locationManager.invalid = false
+                        locationManager.locationString = ""
                     }))
                 }
             }
-        }.onAppear {
-            self.addressString = ""
-            self.showingAlert = false
         }
-        
-    }
-    func getMap() {
-        if locationManager.isValid == false {
-            self.showingAlert.toggle()
-        } else {
-            self.showingAlert = false
-            locationManager.openMapWithAddress(address: addressString)
-            self.addressString = ""
-        }
-        locationManager.openMapWithAddress(address: addressString)
-        self.addressString = ""
     }
 }
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
-        ContentView()
+        ContentView(locationManager: LocationManager())
     }
 }

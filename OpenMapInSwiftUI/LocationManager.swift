@@ -13,15 +13,16 @@ import Combine
 class LocationManager: NSObject, ObservableObject {
     lazy var geocoder = CLGeocoder()
     
-    @Published var locationString = "1140"
-    @Published var isValid: Bool = true
-    static let instance = LocationManager()
-    
-    func openMapWithAddress (address: String) {
+    @Published var locationString = ""
+    @Published var invalid: Bool = false
+   
+    func openMapWithAddress () {
         
-        geocoder.geocodeAddressString(address) { placemarks, error in
+        geocoder.geocodeAddressString(locationString) { placemarks, error in
             if let error = error {
-                DispatchQueue.main.async { self.isValid = false }
+                DispatchQueue.main.async {
+                    self.invalid = true
+                }
                 print(error.localizedDescription)
             }
             
@@ -38,7 +39,7 @@ class LocationManager: NSObject, ObservableObject {
             let place = MKPlacemark(coordinate: coords)
             
             let mapItem = MKMapItem(placemark: place)
-            mapItem.name = address
+            mapItem.name = self.locationString
             mapItem.openInMaps(launchOptions: nil)
         }
         
